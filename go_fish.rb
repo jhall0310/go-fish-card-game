@@ -1,15 +1,102 @@
+
+
 class PlayingCard
-  # initialize
+  attr_reader :rank, :suit, :face
+
+  def initialize(arguments)
+    @rank = arguments[:rank]
+    @suit = arguments[:suit]
+    @face = @rank + @suit
+  end
+  def to_s
+    @face
+  end
+
+end
+
+
+
+
+module Drawable
+  attr_reader :cards
+
+  def initialize(*args)
+    @cards = []
+    post_initialize(*args)
+  end
+
+  # overridden by class
+  def post_initialize(*args)
+    nil
+  end
+
+  def draw(n=1)
+    @cards.pop(n).reverse
+  end
+
+  def draw_one
+    draw.first
+  end
+
+  def push(*cards)
+    @cards.push(*cards)
+  end
 end
 
 class CardDeck
-  # initialize
+  include Drawable
+
+  def post_initialize(shuffled=true)
+    generate_cards
+    shuffle if shuffled
+  end
+
+  def to_s
+    @cards.map {|card| card.face }
+  end
+
+  def shuffle
+    @cards.shuffle!
+  end
+
+  private
+
+  def generate_cards(decks=1)
+    ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
+    suits = ["C", "D", "H", "S"]
+
+    @cards.clear
+
+    decks.times do |i|
+      ranks.each do |rank|
+        suits.each do |suit|
+            self.push( PlayingCard.new(rank: rank, suit: suit) )
+        end
+      end
+    end
+  end
+
 end
+
 
 class HandOfCards
-  # initialize
-end
+  include Drawable
 
+  def post_initialize(starting_cards=[])
+    @cards += starting_cards
+  end
+
+  def to_s
+    @cards.join(" ")
+  end
+
+  def any?(rank: "", suit: "")
+    face = (rank + suit).upcase
+    return false if face.empty?
+    @cards.any? {|c| c.face.match(face) }
+  end
+
+end
 class CardPlayer
   # initialize
 end
